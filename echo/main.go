@@ -44,7 +44,6 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	defer conn.Close()
 	defer wg.Done()
 
-	// use io.Copy to echo data back to the connection
 	_, err := io.Copy(conn, conn)
 	if err != nil {
 		fmt.Printf("Error during copy: %v\n", err)
