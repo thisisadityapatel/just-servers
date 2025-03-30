@@ -17,4 +17,6 @@ COPY --from=builder /run-app /usr/local/bin/
 
 EXPOSE 10000
 
+EXPOSE 10001
+
 CMD ["run-app"]

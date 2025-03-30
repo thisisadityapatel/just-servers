@@ -1,29 +1,23 @@
-package main
+package primetime
 
 import (
 	"fmt"
 	"io"
 	"net"
 	"sync"
+
+	"github.com/thisisadityapatel/just-servers/utilities"
 )
 
-const (
-	HOST = "0.0.0.0"
-	PORT = "10000"
-	TYPE = "tcp"
-)
-
-func main() {
-	listener, err := net.Listen(TYPE, HOST+":"+PORT)
+func PrimeServer(Port string) error {
+	echoServer := utilities.NewTcpServer(Port)
+	listener, err := utilities.GetListener(*echoServer)
 	if err != nil {
-		fmt.Printf("Error creating listener: %v\n", err)
-		return
+		return err
 	}
 	defer listener.Close()
 
-	fmt.Printf("Server listening on %s:%s\n", HOST, PORT)
-
-	// wait group to keep track of concurrent connection processing in goroutine
+	// wait group for tracking concurrent goroutines
 	var wg sync.WaitGroup
 
 	for {
@@ -32,15 +26,12 @@ func main() {
 			fmt.Printf("Error accepting connection: %v\n", err)
 			continue
 		}
-
-		// increment wait group and handle connection in goroutine
 		wg.Add(1)
 		go handleConnection(conn, &wg)
 	}
 }
 
 func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
-	// ensure connection is closed and wait group is decremented when done
 	defer conn.Close()
 	defer wg.Done()
 
