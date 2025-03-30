@@ -1,8 +1,9 @@
 package primetime
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
+	"math"
 	"net"
 	"sync"
 
@@ -35,9 +36,52 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	defer conn.Close()
 	defer wg.Done()
 
-	_, err := io.Copy(conn, conn)
-	if err != nil {
-		fmt.Printf("Error during copy: %v\n", err)
-		return
+	decoder := json.NewDecoder(conn)
+	encoder := json.NewEncoder(conn)
+
+	for {
+		var request map[string]interface{}
+		if err := decoder.Decode(&request); err != nil {
+			sendMalformedResponse(encoder)
+			return
+		}
+
+		method, methodOk := request["method"].(string)
+		number, numberOk := request["number"].(float64)
+
+		if !methodOk || method != "isPrime" || !numberOk {
+			sendMalformedResponse(encoder)
+			return
+		}
+
+		response := map[string]interface{}{
+			"method": "isPrime",
+			"prime":  isPrime(number),
+		}
+
+		if err := encoder.Encode(response); err != nil {
+			fmt.Printf("Error sending response: %v\n", err)
+			return
+		}
 	}
+}
+
+func sendMalformedResponse(encoder *json.Encoder) {
+	malformedResponse := map[string]interface{}{
+		"error": "malformed request",
+	}
+	_ = encoder.Encode(malformedResponse)
+}
+
+func isPrime(number float64) bool {
+	if number <= 1 || number != math.Floor(number) {
+		return false
+	}
+	n := int(number)
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
 }
