@@ -99,5 +99,5 @@ resource "aws_instance" "go_tcp_servers" {
 }
 
 output "public_ip" {
-  value = aws_instance.tcp_server.public_ip
+  value = aws_instance.go_tcp_server.public_ip
 }
