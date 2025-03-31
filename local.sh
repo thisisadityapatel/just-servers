@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_NAME="thisisadityapatel-just-servers"
+IMAGE_NAME="just-servers"
 TAG="latest"
 PORTS=(10000 10001)
 
