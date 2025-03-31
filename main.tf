@@ -1,15 +1,29 @@
 provider "aws" {
-  region     = "us-east-1"
-  access_key = "your-access-key"
-  secret_key = "your-secret-key"
+  region     = "ca-central-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+}
+
+variable "aws_access_key" {
+  type = string
+}
+
+variable "aws_secret_key" {
+  type = string
 }
 
 resource "aws_security_group" "tcp_sg" {
   name        = "allow_tcp_traffic"
   description = "Allow TCP and SSH inbound traffic"
   ingress {
-    from_port   = 5000
-    to_port     = 5000
+    from_port   = 10000
+    to_port     = 10000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 10001
+    to_port     = 10001
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -56,10 +70,10 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
-resource "aws_instance" "tcp_server" {
-  ami                    = "ami-0c55b159cbfafe1f0"
+resource "aws_instance" "go_tcp_servers" {
+  ami                    = "ami-07f7608a8efba8d78"
   instance_type          = "t2.micro"
-  key_name               = "my-key-pair"
+  key_name               = "my-key-pair-go-tcp-servers"
   vpc_security_group_ids = [aws_security_group.tcp_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   user_data              = <<-EOF
@@ -71,7 +85,7 @@ resource "aws_instance" "tcp_server" {
                           source /home/ec2-user/.bashrc
                           yum install git -y
                           yum install awscli -y
-                          git clone https://github.com/yourusername/tcp-server.git /home/ec2-user/tcp-server
+                          git clone https://github.com/thisisadityapatel/just-servers.git /home/ec2-user/tcp-server
                           cd /home/ec2-user/tcp-server
                           /usr/local/go/bin/go build -o server server.go
                           nohup ./server &
