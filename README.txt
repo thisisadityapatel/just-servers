@@ -1,0 +1,1 @@
+IaaS workflow for deploying multiple Go TCP servers on unique ports in an AWS EC2 instance with Terraform, syncing code via GitHub, kickstarting local instance using Docker and a custom .sh script.
