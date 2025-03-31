@@ -73,7 +73,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 resource "aws_instance" "go_tcp_servers" {
   ami                    = "ami-07f7608a8efba8d78"
   instance_type          = "t2.micro"
-  key_name               = "my-key-pair-go-tcp-servers"
+  key_name               = "my-key-pair-go-tcp-server"
   vpc_security_group_ids = [aws_security_group.tcp_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   user_data              = <<-EOF
