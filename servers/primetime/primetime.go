@@ -45,6 +45,70 @@ type Response struct {
 	Prime  bool   `json:"prime"`
 }
 
+type BigNumber struct {
+	BigInt  *big.Int
+	IsFloat bool
+}
+
+func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
+	defer conn.Close()
+	defer wg.Done()
+
+	reader := bufio.NewReader(conn)
+
+	for {
+		message, err := reader.ReadString('\n')
+
+		if err != nil {
+			handleMalformedResponse(conn)
+			break
+		}
+
+		log.Printf("[Primetest] Recieved: %v", message)
+
+		var request Request
+
+		err = json.Unmarshal([]byte(message), &request)
+
+		// handle validation
+		if err != nil {
+			handleMalformedResponse(conn)
+			return
+		}
+
+		if !request.validFields() {
+			handleMalformedResponse(conn)
+			return
+		}
+
+		// convert the string to bigInt
+		if request.Number.IsFloat {
+			res := Response{Method: "isPrime", Prime: false}
+			handleValidResponse(conn, res)
+			break
+		}
+
+		res := Response{Method: "isPrime", Prime: isPrime(*request.Number.BigInt)}
+		handleValidResponse(conn, res)
+	}
+}
+
+func handleValidResponse(c net.Conn, res Response) {
+	resJson, err := json.Marshal(res)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Print("Response: ", string(resJson)+"\n")
+	c.Write([]byte(string(resJson) + "\n"))
+}
+
+func handleMalformedResponse(conn net.Conn) {
+	log.Print("[Primetest] Invalid Fields")
+	conn.Write([]byte("[Primetest] Invalid Fields"))
+}
+
 func (req *Request) validFields() bool {
 	if req.Method == nil {
 		return false
@@ -61,74 +125,11 @@ func (req *Request) validFields() bool {
 	return true
 }
 
-func handleConnection(c net.Conn, wg *sync.WaitGroup) {
-	defer c.Close()
-	defer wg.Done()
-
-	reader := bufio.NewReader(c)
-
-	for {
-		message, err := reader.ReadString('\n')
-
-		if err != nil {
-			log.Print(err.Error())
-			c.Write([]byte(err.Error()))
-			break
-		}
-
-		log.Printf("Recieved: %v", message)
-
-		var request Request
-		err = json.Unmarshal([]byte(message), &request)
-
-		// handle validation
-		if err != nil {
-			log.Print(err.Error())
-			c.Write([]byte(err.Error()))
-			break
-		}
-
-		if !request.validFields() {
-			log.Print("Invalid Fields")
-			c.Write([]byte("Invalid Fields"))
-			break
-		}
-
-		// convert the string to bigInt
-		if request.Number.IsFloat {
-			res := Response{Method: "isPrime", Prime: false}
-			handleResponse(c, res)
-			break
-		}
-
-		// handle response
-		res := Response{Method: "isPrime", Prime: isPrime(*request.Number.BigInt)}
-		handleResponse(c, res)
-	}
-}
-
-func handleResponse(c net.Conn, res Response) {
-	resJson, err := json.Marshal(res)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print("Response: ", string(resJson)+"\n")
-	c.Write([]byte(string(resJson) + "\n"))
-}
-
 func isPrime(n big.Int) bool {
 	return n.ProbablyPrime(10)
 }
 
-type BigNumber struct {
-	BigInt  *big.Int
-	IsFloat bool
-}
-
 func (n *BigNumber) UnmarshalJSON(data []byte) error {
-	// Try to unmarshal into a string first
 	numStr := string(data)
 
 	floatValue := new(big.Float)
@@ -141,7 +142,7 @@ func (n *BigNumber) UnmarshalJSON(data []byte) error {
 			n.IsFloat = true
 		}
 	} else {
-		return fmt.Errorf("invalid number format: %s", numStr)
+		return fmt.Errorf("[Primetest] Invalid number format: %s", numStr)
 	}
 	return nil
 }
