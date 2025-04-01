@@ -51,9 +51,12 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 		number, numberOk := request["number"].(float64)
 
 		if !methodOk || method != "isPrime" || !numberOk {
+			fmt.Printf("[Primetime] Received malformed request: %+v\n", request)
 			sendMalformedResponse(encoder)
 			return
 		}
+
+		fmt.Printf("[Primetime] Received request: %+v\n", request)
 
 		response := map[string]interface{}{
 			"method": "isPrime",
