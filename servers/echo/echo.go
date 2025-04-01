@@ -27,6 +27,7 @@ func EchoServer(Port string) error {
 			continue
 		}
 		// increment wait group and handle connection in goroutine
+		fmt.Printf("[Echo] New connection established from %s\n", conn.RemoteAddr())
 		wg.Add(1)
 		go handleConnection(conn, &wg)
 	}

@@ -24,9 +24,10 @@ func PrimeServer(Port string) error {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Printf("Error accepting connection: %v\n", err)
+			fmt.Printf("[Primetime] Error accepting connection: %v\n", err)
 			continue
 		}
+		fmt.Printf("[Primetime] New connection established from %s\n", conn.RemoteAddr())
 		wg.Add(1)
 		go handleConnection(conn, &wg)
 	}
@@ -60,7 +61,7 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 		}
 
 		if err := encoder.Encode(response); err != nil {
-			fmt.Printf("Error sending response: %v\n", err)
+			fmt.Printf("[Primetime] Error sending response: %v\n", err)
 			return
 		}
 	}
