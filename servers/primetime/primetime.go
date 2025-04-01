@@ -3,7 +3,7 @@ package primetime
 import (
 	"encoding/json"
 	"fmt"
-	"math"
+	"math/big"
 	"net"
 	"sync"
 
@@ -32,7 +32,6 @@ func PrimeServer(Port string) error {
 		go handleConnection(conn, &wg)
 	}
 }
-
 func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	defer conn.Close()
 	defer wg.Done()
@@ -48,10 +47,30 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 		}
 
 		method, methodOk := request["method"].(string)
-		number, numberOk := request["number"].(float64)
+		numberValue, numberOk := request["number"]
 
 		if !methodOk || method != "isPrime" || !numberOk {
 			fmt.Printf("[Primetime] Received malformed request: %+v\n", request)
+			sendMalformedResponse(encoder)
+			return
+		}
+
+		var number big.Int
+
+		switch v := numberValue.(type) {
+		case float64:
+			if v != float64(int64(v)) {
+				fmt.Printf("[Primetime] Received invalid float number: %+v\n", request)
+				sendMalformedResponse(encoder)
+				return
+			}
+			number.SetInt64(int64(v))
+		case int:
+			number.SetInt64(int64(v))
+		case int64:
+			number.SetInt64(v)
+		default:
+			fmt.Printf("[Primetime] Received unknown number type: %+v\n", request)
 			sendMalformedResponse(encoder)
 			return
 		}
@@ -60,7 +79,7 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 
 		response := map[string]interface{}{
 			"method": "isPrime",
-			"prime":  isPrime(number),
+			"prime":  isPrime(&number),
 		}
 
 		if err := encoder.Encode(response); err != nil {
@@ -70,22 +89,14 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	}
 }
 
+func isPrime(n *big.Int) bool {
+	// 20 rounds of Miller-Rabin test
+	return n.ProbablyPrime(20)
+}
+
 func sendMalformedResponse(encoder *json.Encoder) {
 	malformedResponse := map[string]interface{}{
 		"error": "malformed request",
 	}
 	_ = encoder.Encode(malformedResponse)
-}
-
-func isPrime(number float64) bool {
-	if number <= 1 || number != math.Floor(number) {
-		return false
-	}
-	n := int(number)
-	for i := 2; i*i <= n; i++ {
-		if n%i == 0 {
-			return false
-		}
-	}
-	return true
 }
