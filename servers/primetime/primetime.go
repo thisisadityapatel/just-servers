@@ -41,45 +41,42 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	encoder := json.NewEncoder(conn)
 
 	for {
-		var request map[string]interface{}
+		type Request struct {
+			Method string    `json:"method"`
+			Number BigNumber `json:"number"`
+		}
+
+		var request Request
 		if err := decoder.Decode(&request); err != nil {
 			sendMalformedResponse(encoder)
 			return
 		}
 
-		method, methodOk := request["method"].(string)
-		numberValue, numberOk := request["number"]
-
-		if !methodOk || method != "isPrime" || !numberOk {
-			fmt.Printf("[Primetime] Received malformed request: %+v\n", request)
+		if request.Method != "isPrime" {
+			fmt.Printf("[Primetime] Received invalid method: %s\n", request.Method)
 			sendMalformedResponse(encoder)
 			return
 		}
 
-		numberFloat, isFloat := numberValue.(float64)
-		if !isFloat {
-			fmt.Printf("[Primetime] Received non-number type: %+v\n", request)
+		if request.Number.IsFloat {
+			fmt.Printf("[Primetime] Received float number, expected integer: %+v\n", request.Number)
 			sendMalformedResponse(encoder)
 			return
 		}
 
-		if numberFloat != float64(int64(numberFloat)) {
-			fmt.Printf("[Primetime] Received non-integer number: %+v\n", request)
+		if request.Number.BigInt.Sign() < 0 {
+			fmt.Printf("[Primetime] Received negative number: %+v\n", request.Number)
 			sendMalformedResponse(encoder)
 			return
 		}
 
-		var number big.Int
-		number.SetInt64(int64(numberFloat))
-
-		fmt.Printf("[Primetime] Received request: %+v\n", request)
+		fmt.Printf("[Primetime] Received request: method=%s, number=%s\n",
+			request.Method, request.Number.BigInt.String())
 
 		response := map[string]interface{}{
 			"method": "isPrime",
-			"prime":  isPrime(&number),
+			"prime":  isPrime(request.Number.BigInt),
 		}
-
-		fmt.Printf("[Primetime] Outgoing response: %+v\n", response)
 
 		if err := encoder.Encode(response); err != nil {
 			fmt.Printf("[Primetime] Error sending response: %v\n", err)
@@ -97,4 +94,27 @@ func sendMalformedResponse(encoder *json.Encoder) {
 		"error": "malformed request",
 	}
 	_ = encoder.Encode(malformedResponse)
+}
+
+type BigNumber struct {
+	BigInt  *big.Int
+	IsFloat bool
+}
+
+func (n *BigNumber) UnmarshalJSON(data []byte) error {
+	numStr := string(data)
+
+	floatValue := new(big.Float)
+	if _, ok := floatValue.SetString(numStr); ok {
+		if floatValue.IsInt() {
+			n.BigInt = new(big.Int)
+			floatValue.Int(n.BigInt)
+			n.IsFloat = false
+		} else {
+			n.IsFloat = true
+		}
+	} else {
+		return fmt.Errorf("invalid number format: %s", numStr)
+	}
+	return nil
 }
