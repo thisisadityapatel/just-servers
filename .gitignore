@@ -4,6 +4,6 @@
 env
 venv
 terraform.tfvars
-*.tfvars
 .terraform
 .terraform.lock.hcl
+*.tfstate
