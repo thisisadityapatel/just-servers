@@ -32,6 +32,7 @@ func PrimeServer(Port string) error {
 		go handleConnection(conn, &wg)
 	}
 }
+
 func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	defer conn.Close()
 	defer wg.Done()
@@ -55,25 +56,21 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			return
 		}
 
-		var number big.Int
-
-		switch v := numberValue.(type) {
-		case float64:
-			if v != float64(int64(v)) {
-				fmt.Printf("[Primetime] Received invalid float number: %+v\n", request)
-				sendMalformedResponse(encoder)
-				return
-			}
-			number.SetInt64(int64(v))
-		case int:
-			number.SetInt64(int64(v))
-		case int64:
-			number.SetInt64(v)
-		default:
-			fmt.Printf("[Primetime] Received unknown number type: %+v\n", request)
+		numberFloat, isFloat := numberValue.(float64)
+		if !isFloat {
+			fmt.Printf("[Primetime] Received non-number type: %+v\n", request)
 			sendMalformedResponse(encoder)
 			return
 		}
+
+		if numberFloat != float64(int64(numberFloat)) {
+			fmt.Printf("[Primetime] Received non-integer number: %+v\n", request)
+			sendMalformedResponse(encoder)
+			return
+		}
+
+		var number big.Int
+		number.SetInt64(int64(numberFloat))
 
 		fmt.Printf("[Primetime] Received request: %+v\n", request)
 
@@ -81,6 +78,8 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			"method": "isPrime",
 			"prime":  isPrime(&number),
 		}
+
+		fmt.Printf("[Primetime] Outgoing response: %+v\n", response)
 
 		if err := encoder.Encode(response); err != nil {
 			fmt.Printf("[Primetime] Error sending response: %v\n", err)
@@ -90,7 +89,6 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 }
 
 func isPrime(n *big.Int) bool {
-	// 20 rounds of Miller-Rabin test
 	return n.ProbablyPrime(20)
 }
 
