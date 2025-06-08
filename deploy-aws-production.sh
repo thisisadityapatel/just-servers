@@ -4,6 +4,6 @@
 echo "Initializing Terraform..."
 terraform init
 
-# Apply Terraform configuration
+# Apply Terraform configuration with terraform.tfvars
 echo "Applying Terraform configuration..."
-terraform apply -auto-approve
+terraform apply -var-file="terraform.tfvars" -auto-approve
