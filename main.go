@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/thisisadityapatel/just-servers/servers/echo"
+	"github.com/thisisadityapatel/just-servers/servers/means_to_an_end"
 	"github.com/thisisadityapatel/just-servers/servers/primetime"
 )
 
@@ -16,9 +17,10 @@ func main() {
 	}{
 		{name: "Echo Server", startFunc: echo.EchoServer, port: "10000"},
 		{name: "Prime Server", startFunc: primetime.PrimeServer, port: "10001"},
+		{name: "Means To An End Server", startFunc: means_to_an_end.Means_To_An_End_Server, port: "10002"},
 	}
 
-	// starting each server in a goroutine
+	// initiating servers in separate goroutines
 	for _, server := range servers {
 		go func(name, port string, startFunc func(string) error) {
 			fmt.Printf("Starting %s on port %s...\n", name, port)

@@ -29,7 +29,7 @@ func PrimeServer(Port string) error {
 			fmt.Printf("[Primetime] Error accepting connection: %v\n", err)
 			continue
 		}
-		fmt.Printf("[Primetime] New connection established from %s\n", conn.RemoteAddr())
+		fmt.Printf("[PrimeTime] New connection established from %s\n", conn.RemoteAddr())
 		wg.Add(1)
 		go handleConnection(conn, &wg)
 	}
