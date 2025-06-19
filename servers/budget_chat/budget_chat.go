@@ -1,10 +1,14 @@
 package budget_chat
 
 import (
-	"encoding/binary"
+	"bufio"
+	"errors"
 	"fmt"
+	"log"
 	"net"
+	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/thisisadityapatel/just-servers/utilities"
 )
@@ -29,7 +33,7 @@ func Budget_Chat_Server(Port string) error {
 		}
 		fmt.Printf("[BudgetChat] New connection established from %s\n", conn.RemoteAddr())
 		wg.Add(1)
-		go handleConnection(conn, &wg, &userMap)
+		go handleConnection(conn, &wg, userMap)
 	}
 }
 
