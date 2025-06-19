@@ -10,8 +10,8 @@ import (
 )
 
 func Means_To_An_End_Server(Port string) error {
-	echoServer := utilities.NewTcpServer(Port)
-	listener, err := utilities.GetListener(*echoServer)
+	meansToAnEndServer := utilities.NewTcpServer(Port)
+	listener, err := utilities.GetListener(*meansToAnEndServer)
 	if err != nil {
 		return err
 	}

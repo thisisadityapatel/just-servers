@@ -6,6 +6,7 @@ import (
 	"github.com/thisisadityapatel/just-servers/servers/echo"
 	"github.com/thisisadityapatel/just-servers/servers/means_to_an_end"
 	"github.com/thisisadityapatel/just-servers/servers/primetime"
+	"github.com/thisisadityapatel/just-servers/servers/budget_chat"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func main() {
 		{name: "Echo Server", startFunc: echo.EchoServer, port: "10000"},
 		{name: "Prime Server", startFunc: primetime.PrimeServer, port: "10001"},
 		{name: "Means To An End Server", startFunc: means_to_an_end.Means_To_An_End_Server, port: "10002"},
+		{name: "Budget Chat Server", startFunc: budget_chat.Budget_Chat_Server, port: "10003"},
 	}
 
 	// initiating servers in separate goroutines

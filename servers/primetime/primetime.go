@@ -13,8 +13,8 @@ import (
 )
 
 func PrimeServer(Port string) error {
-	echoServer := utilities.NewTcpServer(Port)
-	listener, err := utilities.GetListener(*echoServer)
+	primetimeServer := utilities.NewTcpServer(Port)
+	listener, err := utilities.GetListener(*primetimeServer)
 	if err != nil {
 		return err
 	}
