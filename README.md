@@ -15,6 +15,7 @@ Low-level network servers (TCP|UDP) in Go, managed on AWS EC2 using Terraform fo
 Locally
 ```shell
 chmod +x deploy-locally.sh
+./deploy-locally.sh
 ```
 
 AWS EC2 (t2-micro)
