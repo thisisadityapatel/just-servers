@@ -28,7 +28,7 @@ func Budget_Chat_Server(Port string) error {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Printf("Error accepting connection: %v\n", err)
+			fmt.Printf("[BudgetChat] Error accepting connection: %v\n", err)
 			continue
 		}
 		fmt.Printf("[BudgetChat] New connection established from %s\n", conn.RemoteAddr())
@@ -59,14 +59,14 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup, userMap *UserMap) {
 
 	defer leaveRequest(nickname, userMap)
 
-	Broadcast(nickname, "* "+nickname+" joined the room", userMap)
+	Broadcast(nickname, "* "+nickname+" has entered the room", userMap)
 	log.Printf("%s joined the room", nickname)
 
 	for scanner.Scan() {
 		message := strings.TrimSpace(scanner.Text())
 
 		if len(message) > 1000 {
-			conn.Write([]byte("message is too long. Re-send the message\n"))
+			conn.Write([]byte("message is too long. re-send the message\n"))
 			continue
 		}
 
@@ -90,17 +90,17 @@ func joinRequest(scanner *bufio.Scanner, userMap *UserMap) (string, error) {
 	log.Print("[BudgetChat] Received name: ", inputUsername)
 
 	if len(inputUsername) < 1 || len(inputUsername) > 18 {
-		return "", errors.New("Length of the username is less than 2 or greater than 19")
+		return "", errors.New("length of the username is less than 2 or greater than 19")
 	}
 
 	for _, character := range inputUsername {
 		if !unicode.IsLetter(character) && !unicode.IsDigit(character) {
-			return "", errors.New("Invalid characters")
+			return "", errors.New("invalid characters")
 		}
 	}
 
 	if _, ok := userMap.GetUserConnection(inputUsername); ok {
-		return "", errors.New("Username already taken in the chat server")
+		return "", errors.New("username already taken in the chat server")
 	}
 
 	return inputUsername, nil
