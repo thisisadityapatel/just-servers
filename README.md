@@ -12,7 +12,7 @@ Low-level network servers (TCP|UDP) in Go, managed on AWS EC2 using Terraform fo
 
 #### Set-up
 
-Locally
+Local Docker
 ```shell
 chmod +x deploy-locally.sh
 ./deploy-locally.sh
