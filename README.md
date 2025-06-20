@@ -1,6 +1,6 @@
 ## just-servers
 
-Low-level network servers (TCP|UDP) in Go, managed on AWS EC2 using Terraform for provisioning, deployment and termination.
+Low-level network servers (TCP|UDP protocols) in Go, managed on AWS EC2 using Terraform for provisioning, deployment and termination.
 
 #### Challenges
 [Protohacker Challenges](https://protohackers.com)
