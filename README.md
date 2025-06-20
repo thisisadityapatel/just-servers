@@ -12,13 +12,14 @@ Low-level network servers (TCP|UDP protocols) in Go, managed on AWS EC2 using Te
 
 #### Set-up
 
-Local Docker
+##### Local Docker
 ```shell
 chmod +x deploy-locally.sh
 ./deploy-locally.sh
 ```
 
-AWS EC2 (t2-micro)
+##### AWS EC2 (t2-micro)
+Create `terraform.tfvars` file using `terraform-template.tfvars`.
 ```shell
 terraform init
 terraform apply
