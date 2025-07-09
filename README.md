@@ -10,17 +10,17 @@ Low-level network servers (TCP|UDP protocols) in Go, managed on AWS EC2 using Te
 - [2: Means to an End](https://github.com/thisisadityapatel/just-servers/tree/main/servers/means_to_an_end)
 - [3: Budget Chat](https://github.com/thisisadityapatel/just-servers/tree/main/servers/budget_chat)
 
-#### Set-up
+### Set-up
 
-##### Local Docker
-```shell
-chmod +x deploy-locally.sh
-./deploy-locally.sh
-```
-
-##### AWS EC2 (t2-micro)
-Create `terraform.tfvars` file using `terraform-template.tfvars`.
+#### Run on AWS EC2 (t2-micro)
+Create `terraform.tfvars` file using `terraform-template.tfvars`. (Suggested)
 ```shell
 terraform init
 terraform apply
+```
+
+#### Run Locally on Docker
+```shell
+chmod +x deploy-locally.sh
+./deploy-locally.sh
 ```
