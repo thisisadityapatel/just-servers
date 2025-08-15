@@ -13,10 +13,15 @@ Low-level network servers (TCP|UDP protocols) in Go, managed on AWS EC2 using Te
 ### Set-up
 
 #### Run on AWS EC2 (t2-micro)
-Create `terraform.tfvars` file using `terraform-template.tfvars`. (Suggested)
+Create `terraform.tfvars` file using `terraform-template.tfvars`.
 ```shell
 terraform init
 terraform apply
+```
+
+To deprovisions and removes all infrastructure resources managed by this Terraform configuration run:
+```shell
+terraform destroy
 ```
 
 #### Run Locally on Docker
